@@ -3,20 +3,20 @@
 #Search for (similar) web pages
 
 #Imports
-import sqlite as sql
-# import sqlite3 as sql #Problem with sql.connect()
+# import sqlite as sql
+import sqlite3 as sql #Problem with sql.connect()
 import os
 import time
 
 __author__ = "Jorge Blanco"
 __description__ = "Create, search and analyze a DB with your Apple's newsstand app information"
-__email__ = "mail [at] jorgeblan [dot] co"
+__email__ = "py [at] jorgeblan [dot] co"
 __license__ = "GPLv2"
 __maintainer__ = "Jorge Blanco"
 __status__ = "Development"
-__version__ = "0.2"
+__version__ = "0.1"
 
-class newsstandDB:
+class newsstand_db:
     '''
     Create, search and analyze a DB with Apple's newsstand information
     **********************************
