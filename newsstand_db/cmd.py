@@ -1,5 +1,5 @@
-from . import create
+from newsstand_db import newsstandDB
 
 
 def newsstanddb_create():
-    create()
+    newsstandDB.createDB('test.sql')

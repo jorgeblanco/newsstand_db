@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-import newsstand_db as ndb
+from newsstand_db import newsstandDB as ndb
 
 class TestCreate(TestCase):
-    def test_is_string(self):
-        s = ndb.create()
-        self.assertTrue(isinstance(s, newsstand_db))
+    def test_is_ndb(self):
+        s = ndb()
+        self.assertTrue(isinstance(s, ndb))
