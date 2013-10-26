@@ -27,7 +27,10 @@ setup(name='newsstand_db',
       tests_require=['nose'],
 #       scripts=['bin/newsstanddb-create'],
       entry_points={
-          'console_scripts': ['newsstanddb-create=newsstand_db.cmd:newsstanddb_create'],
+          'console_scripts': ['newsstanddb-create=newsstand_db.cmd:newsstanddb_create',
+                              'newsstanddb-import=newsstand_db.cmd:newsstanddb_import',
+                              'newsstanddb-update=newsstand_db.cmd:newsstanddb_autoupdate',
+                              'newsstanddb-getdbfile=newsstand_db.cmd:newsstanddb_getdbfile',],
       },
       include_package_data=True,
       zip_safe=False)

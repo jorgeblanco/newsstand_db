@@ -1,6 +1,7 @@
 from unittest import TestCase
-
 from newsstand_db import newsstandDB as ndb
+from os.path import isfile
+from os import remove
 
 '''
 Functions to test:
@@ -21,20 +22,23 @@ class TestStats(TestCase):
     def setUp(self):
         self.__db = ndb('test.sql')
         self.__db.createDB()
-        self.__db.importData('test.csv')
+        self.__db.importData('test2.csv')
         
     def tearDown(self):
         self.__db.removeDB()
+#         self.__db.con.close()
         
     def testUniqueUsers(self):
         s = self.__db.calculateUniqueUsers()        
+#         print s #Debug
         self.assertTrue(isinstance(s, int),'Unique users is not an integer')
-        self.assertEqual(s, 30, 'Unique users doesn\'t return the expected value')
+        self.assertEqual(s, 346, 'Unique users doesn\'t return the expected value')
         
     def testPayingUsers(self):
-        s = self.__db.calculatePayingUsers()        
+        s = self.__db.calculatePayingUsers()   
+#         print s #Debug     
         self.assertTrue(isinstance(s, int),'Paying users is not an integer')
-        self.assertEqual(s, 3, 'Paying users doesn\'t return the expected value')
+        self.assertEqual(s, 19, 'Paying users doesn\'t return the expected value')
         
     def testConversion(self):
         s = self.__db.calculateConversion(30,3)        
@@ -44,7 +48,8 @@ class TestStats(TestCase):
     def testProceeds(self):
         s = self.__db.calculateTotalProceeds()        
         self.assertTrue(isinstance(s, float),'Total proceeds is not a float')
-        self.assertEqual(s, 10.0, 'Total proceeds doesn\'t return the expected value')
+        self.assertAlmostEqual(s, 71.4, msg='Total proceeds doesn\'t return the expected value',
+                               delta=0.1)
         
     def testProceedsPerUser(self):
         s = self.__db.calculateProceedsPerUser(10.0,30)        
@@ -60,4 +65,13 @@ class TestStats(TestCase):
     def testSubscribers(self):
         s = self.__db.calculateCurrentSubscribers()        
         self.assertTrue(isinstance(s, int),'Current subscribers is not an integer')
-        self.assertEqual(s, 1, 'Current subscribers doesn\'t return the expected value')
+        self.assertEqual(s, 14, 'Current subscribers doesn\'t return the expected value')
+        
+    def testWriteStats(self):
+        self.__db.buildStats()
+        self.__db.writeStats()
+        self.__db.cur.execute('SELECT * FROM stats')
+        s = self.__db.cur.fetchall()
+#         print s #Debug
+        self.assertEqual(len(s), 1, 'The length of the stats table is not as expected')
+        
