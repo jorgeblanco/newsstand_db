@@ -2,8 +2,8 @@ from unittest import TestCase
 from newsstand_db import newsstandDB as ndb
 
 class TestCreate(TestCase):
-    __dataSQL = '''CREATE TABLE data (Provider TEXT, ProviderCountry TEXT, SKU TEXT, Developer TEXT, Title TEXT, Version TEXT, ProductTypeIdentifier TEXT, Units INTEGER, DeveloperProceeds REAL, CustomerCurrency TEXT, CountryCode TEXT, CurrencyOfProceeds TEXT, AppleIdentifier TEXT, CustomerPrice REAL, PromoCode TEXT, ParentIdentifier TEXT, Subscription TEXT, Period TEXT, DownloadDatePST TEXT, CustomerIdentifier TEXT, ReportDate_Local TEXT, SalesReturn TEXT, Category TEXT)'''
-    __fileSQL = '''CREATE TABLE file (filename TEXT UNIQUE, hash TEXT)'''
+    __dataSQL = '''CREATE TABLE data (Provider TEXT, ProviderCountry TEXT, SKU TEXT, Developer TEXT, Title TEXT, Version TEXT, ProductTypeIdentifier TEXT, Units INTEGER, DeveloperProceeds REAL, CustomerCurrency TEXT, CountryCode TEXT, CurrencyOfProceeds TEXT, AppleIdentifier TEXT, CustomerPrice REAL, PromoCode TEXT, ParentIdentifier TEXT, Subscription TEXT, Period TEXT, DownloadDatePST TEXT, CustomerIdentifier TEXT, ReportDate_Local TEXT, SalesReturn TEXT, Category TEXT DEFAULT \'\')'''
+    __fileSQL = '''CREATE TABLE file (filename TEXT UNIQUE, hash TEXT UNIQUE)'''
     __statsSQL = '''CREATE TABLE stats (Date TEXT, UniqueUsers INTEGER, PayingUsers INTEGER, Conversion REAL, TotalProceeds REAL, ProceedsPerUser REAL, CLV REAL, CurrentSubscribers INTEGER)'''
     __monthProceedsSQL = '''CREATE TABLE monthProceeds (Month TEXT, Proceeds REAL)'''
     __optinSQL = '''CREATE TABLE optin (FirstName TEXT, LastName TEXT, EmailAddress TEXT, PostalCode TEXT, AppleIdentifier TEXT, ReportStartDate TEXT, ReportEndDate TEXT)'''
@@ -27,7 +27,7 @@ class TestCreate(TestCase):
         s.cur.execute("SELECT name FROM sqlite_master WHERE type = 'table';")
         t = s.cur.fetchall()
 #         print t
-        
+        #     @unittest.skip('Temp')          
         # Verify that the tables we = ndb('test.sql')re created
         self.assertIn((u'data',), t, '\'data\' table not in database')
         self.assertIn((u'file',), t, '\'file\' table not in database')

@@ -17,6 +17,9 @@ class TestStats(TestCase):
         self.__db.outputStats('stats.md')
         self.assertTrue(isfile('stats.md'), 'The stats file is not being created')
         remove('stats.md')
+    
+    def testPrintStats(self):
+        pass
         
     def testOptinExport(self):
         pass

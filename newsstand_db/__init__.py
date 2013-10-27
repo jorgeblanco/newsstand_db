@@ -8,6 +8,8 @@ from hashlib import md5
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from os.path import isfile
+from os.path import abspath
+from csvreader import unicode_csv_reader as ucsvreader
 # from __future__ import division
 
 __author__ = "Jorge Blanco"
@@ -28,6 +30,7 @@ class newsstandDB:
         importCSV(filename) #imports CSV file into a buffer
         importData(filename) #imports CSV file into the data table
         importOptin(filename) #imports the optin file into the optin table
+        multiImport(*files) #Import files into DB
         buildStats() #Analyzes the data
         writeStats() #Writes the stats into the stats table
         outputStats(filename) #Write current stats to external file
@@ -53,7 +56,7 @@ class newsstandDB:
     '''
     __path = os.path.split(__file__)[0]
     __log = True
-    __logfile = os.path.join(__path, 'newsstandDB.log')
+    __logfile = os.path.join(__path, 'newsstandDB.log') #TODO: Add logging to functions
     __dataStructure = ('Provider TEXT','ProviderCountry TEXT','SKU TEXT',
                        'Developer TEXT','Title TEXT','Version TEXT',
                        'ProductTypeIdentifier TEXT','Units INTEGER',
@@ -63,8 +66,8 @@ class newsstandDB:
                        'PromoCode TEXT','ParentIdentifier TEXT',
                        'Subscription TEXT','Period TEXT','DownloadDatePST TEXT',
                        'CustomerIdentifier TEXT','ReportDate_Local TEXT',
-                       'SalesReturn TEXT','Category TEXT')
-    __fileStructure = ('filename TEXT UNIQUE','hash TEXT')
+                       'SalesReturn TEXT','Category TEXT DEFAULT \'\'')
+    __fileStructure = ('filename TEXT UNIQUE','hash TEXT UNIQUE')
     __statsStructure = ('Date TEXT','UniqueUsers INTEGER','PayingUsers INTEGER',
                         'Conversion REAL','TotalProceeds REAL','ProceedsPerUser REAL',
                         'CLV REAL','CurrentSubscribers INTEGER')
@@ -74,6 +77,7 @@ class newsstandDB:
                         'ReportStartDate TEXT','ReportEndDate TEXT')
     
     __dbFilename = ''
+    __pDBFile = os.path.join(__path, 'dbfile') #Persistent DB file store
     
     __uniqueUsers = 0
     __payingUsers = 0
@@ -85,22 +89,34 @@ class newsstandDB:
     
     __dateFormat = '%m/%d/%Y'
     
-    def __init__(self, dbPath='newsstandDB.sql',absolutePath=False):
+    def __init__(self, dbPath='newsstandDB.sql',atBase=False):
         '''init: Connect to the database and initialize variables'''
         #Connect to the database
-        if not absolutePath:
-            realFilename = os.path.join(self.__path, dbPath)
+        if dbPath == ':memory:':
+            self.__dbFilename = ':memory:'
         else:
-            realFilename = dbPath
-        self.__dbFilename = realFilename
-        assert self.__dbFilename
-        self.con = sql.connect(self.__dbFilename)
-        self.cur = self.con.cursor()
-        print 'Connected to the database'
+            if not atBase:
+                realFilename = abspath(dbPath)
+            else:
+                realFilename = os.path.join(self.__path, dbPath)
+            self.__dbFilename = realFilename
+#         assert self.__dbFilename #Unnecessary?
+
+        try:
+            self.con = sql.connect(self.__dbFilename)
+        except sql.OperationalError: #If unable to connect to the database
+            print '\nError: Unable to connect to the database (Err13)\n'
+            exit(-1)
+        else:
+            self.cur = self.con.cursor()
+            print 'Connected to the database\n'
         
     def __del__(self):
         '''del: Try to shutdown as cleanly as possible. Close the database connection and open file handles'''
-        self.con.close()
+        try:
+            self.con.close()
+        except AttributeError:
+            print '\nError: No connection to close (Err5)\n'
     
     def log(self,msg):
         '''log(msg): Write msg to the log'''
@@ -213,27 +229,42 @@ class newsstandDB:
     
     def createDB(self): 
         '''createDB(): Creates the DB tables (DB file itself is created at __init__)'''
-        for name,structure in [('data',self.__dataStructure),('file',self.__fileStructure),
-                               ('stats',self.__statsStructure),
-                               ('monthProceeds',self.__monthProceedsStructure),
-                               ('optin',self.__optinStructure)]:
+        try:
+            for name,structure in [('data',self.__dataStructure),('file',self.__fileStructure),
+                                   ('stats',self.__statsStructure),
+                                   ('monthProceeds',self.__monthProceedsStructure),
+                                   ('optin',self.__optinStructure)]:
+                try:
+                    code = ''.join(["CREATE TABLE ",name," (",', '.join(structure),")"])
+                    with self.con:
+                        self.con.execute(code)
+                except sql.OperationalError:
+                    pass
+        except:
+            raise
+        else:
             try:
-                code = ''.join(["CREATE TABLE ",name," (",', '.join(structure),")"])
-                with self.con:
-                    self.con.execute(code)
-            except sql.OperationalError:
-                pass
+                if self.__dbFilename != ':memory:':
+                    self.setDBFile(self.__dbFilename)
+            except IOError:
+                print 'Could not set persistent DB file'
+        
     
     def removeDB(self): 
         '''removeDB(): Deletes the DB file'''
-        os.remove(self.__dbFilename)
+        try:
+            os.remove(self.__dbFilename)
+        except IOError:
+            print 'Could not remove database'
+            raise
     
     def importCSV(self,filename,skipHeader=True): 
         '''importCSV(filename): imports CSV file into a buffer'''
         if not isfile(filename):
             raise IOError
         with open(filename,'r') as fin:
-            readerData = csv.reader(fin, delimiter='\t')
+            readerData = ucsvreader(fin, delimiter='\t')
+#             readerData = csv.reader(fin, delimiter='\t') #old csv reader (doesnt support utf8)
             if not skipHeader:
                 return [[j for j in i] for i in readerData]
             else:
@@ -259,13 +290,28 @@ class newsstandDB:
             self.fileInDB(filename)
         except:
             return False #Skip silently
-#             raise 
+#             raise #Debug
         else:
-            data = self.importCSV(filename)
-            with self.con:
-                self.con.executemany(''.join(['INSERT INTO data VALUES (',
-                                          ','.join(['?']*len(self.__dataStructure)),')']), 
-                                 data)
+            try:
+                data = self.importCSV(filename)
+            except csv.Error:
+                print "Could not parse file (Err45)"
+                raise
+            try:
+                with self.con:
+                    self.con.executemany(''.join(['INSERT INTO data VALUES (',
+                                              ','.join(['?']*len(self.__dataStructure)),')']), 
+                                     data)
+            except:
+                try:
+                    with self.con:
+                        data2 = [x + [u''] for x in data]
+#                         print data2 #Debug
+                        self.con.executemany(''.join(['INSERT INTO data VALUES (',
+                                                  ','.join(['?']*len(self.__dataStructure)),')']), 
+                                         data2)
+                except:
+                    raise
             self.insertFileToDB(filename)
     
     def importOptin(self,filename): 
@@ -273,14 +319,53 @@ class newsstandDB:
         try:
             self.fileInDB(filename)
         except:
-            raise 
+            return False #Skip silently
+#             raise #Debug
         else:
-            data = self.importCSV(filename)
+            try:
+                data = self.importCSV(filename)
+            except csv.Error:
+                print "Could not parse file (Err45)"
+                raise
             with self.con:
-                self.con.executemany(''.join(['INSERT INTO optin VALUES (',
-                                         ','.join(['?']*len(self.__optinStructure)),')']), 
-                                 data)
+                try:
+                    data2 = [x[:-1] for x in data]
+                    self.con.executemany(''.join(['INSERT INTO optin VALUES (',
+                                                 ','.join(['?']*len(self.__optinStructure)),
+                                                 ')']), data2)
+                except:
+#                     raise #No need for the code below in reaal life, as the files always
+#                            include the extra empty field
+                    try:
+                        self.con.executemany(''.join(['INSERT INTO optin VALUES (',
+                                                 ','.join(['?']*len(self.__optinStructure)),')']), 
+                                         data)
+                    except:
+                        print data
+                        raise
             self.insertFileToDB(filename)
+            
+    def multiImport(self,*files):
+        '''multiImport(*files): Import files into DB'''
+        pErr = False #ProgrammingError flag
+        errFiles = []
+        for file in files:
+            try:
+                self.importData(file)
+            except IOError:
+                print 'File %s does not exist' % file
+            except:
+#                 raise #Debug
+                try:
+                    self.importOptin(file)
+                except (sql.ProgrammingError,csv.Error) as e:
+                    print 'Could not import file: {0} ({1})'.format(file,e.message)
+                    errFiles.append(file)
+                    pErr = True
+                except:
+                    raise
+        if pErr:
+            raise sql.ProgrammingError(','.join(errFiles))
     
     def buildStats(self):
         '''buildStats(): #Analyzes the data'''
@@ -302,9 +387,9 @@ class newsstandDB:
             self.con.execute(''.join(['INSERT INTO stats VALUES (',
                                          ','.join(['?']*len(self.__statsStructure)),')']), 
                                  data)
-        
-    def outputStats(self,filename='stats.md'):
-        '''outputStats(filename): Write current stats to external file'''
+            
+    def getStats(self):
+        '''getStats(): return stats tuple'''
         date = datetime.strftime(datetime.now(), self.__dateFormat)
         stats = (('Unique Users',str(self.__uniqueUsers)),
                  ('Paying Users',str(self.__payingUsers)),
@@ -313,6 +398,24 @@ class newsstandDB:
                  ('Proceeds Per User',"${0:.2f}".format(self.__proceedsPerUser)),
                  ('Client Lifetime Value',"${0:.2f}".format(self.__clv)),
                  ('Current Subscribers',str(self.__currentSubscribers)))
+        
+        return date, stats
+    
+    def printStats(self):
+        '''printStats(): print the stats to the stdout'''
+        date, stats = self.getStats()
+        
+        print '---------------------------------'
+        print ''.join(['|'.ljust(6),'Stats for ',date,'|'.rjust(7)])
+        print '---------------------------------'
+        for label,data in stats:
+            print ''.join(['|',label.rjust(22),': ',data.ljust(7),'|'])
+        print '---------------------------------'
+        
+    def outputStats(self,filename='stats.md'):
+        '''outputStats(filename): Write current stats to external file'''
+        date, stats = self.getStats()
+        
         try:
             with open(filename,'w') as fp:
                 fp.write(''.join(['#Stats for ',date,'\n\n']))
@@ -320,3 +423,13 @@ class newsstandDB:
                     fp.write(''.join(['- ',label,': ',data,'\n']))
         except IOError:
             print 'Unable to write to stats file %s' % filename
+            
+    def setDBFile(self,file):
+        '''setDBFile(file): Set the persistent DB file path'''
+        with open(self.__pDBFile,'w') as fp:
+            fp.write(abspath(file))
+            
+    def getDBFile(self):
+        '''getDBFile(): Get the persistent DB file path'''
+        with open(self.__pDBFile,'r') as fin:
+            return fin.read()

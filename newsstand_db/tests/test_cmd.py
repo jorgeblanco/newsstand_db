@@ -2,6 +2,7 @@ from unittest import TestCase
 import unittest
 from newsstand_db import newsstandDB as ndb
 from os import remove
+from subprocess import call
 
 from newsstand_db.cmd import newsstanddb_create
 from newsstand_db.cmd import newsstanddb_import
@@ -14,25 +15,55 @@ class TestCmd(TestCase):
         
     def tearDown(self):
         self.__db.removeDB()
-#         self.__db.con.close()
+#         self.__db.con.close() # Debug
     
 #     @unittest.skip('Temp')    
     def testCreate(self):
-        newsstanddb_create('test.sql')
+        self.assertFalse(call(["newsstanddb-create", "test.sql"]), "newsstanddb-create failed")
+    
+#     @unittest.skip('Temp')    
+    def testCreateFail(self):
+        self.assertTrue(call(["newsstanddb-create", "/test.sql"]), ''''newsstanddb-create succeeded
+        when it should have failed''')
     
 #     @unittest.skip('Temp')    
     def testMultipleImport(self):
         self.__db.createDB()
         self.__db.con.close()
-        newsstanddb_import('test.csv','test2.csv','testOptin.csv')
-        self.__db = ndb('test.sql')
-        self.__db.buildStats()
-        self.__db.writeStats()
-        self.__db.outputStats('statsImport.md')
-        remove('statsImport.md')
+        self.assertFalse(call(["newsstanddb-import", "test.csv", "test2.csv", "testOptin.csv"]), 
+                         "newsstanddb-import failed")
+        
+#     @unittest.skip('Temp')    
+    def testMultipleImportFail(self):
+        self.__db.createDB()
+        self.__db.con.close()
+        self.assertFalse(call(["newsstanddb-import", "test.csv", "faketest.csv"]), 
+                         "newsstanddb-import failed to handle the exception properly")
     
 #     @unittest.skip('Temp')      
     def testAutoUpdate(self):
         self.__db.createDB()
-        newsstanddb_autoupdate('.',('*.csv',),'stats.md')
+        self.assertFalse(call(["newsstanddb-update", "-d", ".", "-p", "*.csv", "-o", "stats.md"]), 
+                         "newsstanddb-update failed")
         remove('stats.md')
+        
+#     @unittest.skip('Temp')      
+    def testAutoUpdateVerbose(self):
+        self.__db.createDB()
+        self.assertFalse(call(["newsstanddb-update", "-d", ".", "-p", "*.csv", "-o", "stats.md", 
+                               "-vvv"]),"newsstanddb-update failed")
+        remove('stats.md')
+
+#     @unittest.skip('Temp')          
+    def testGetStats(self):
+        self.__db.createDB()
+        call(["newsstanddb-import", "test.csv", "test2.csv", "testOptin.csv"])
+        self.assertFalse(call(["newsstanddb-stats",]),"newsstanddb-stats failed")
+
+#     @unittest.skip('Temp')          
+    def testGetDBFile(self):
+        self.assertTrue(call(["newsstanddb-getdbfile",]),"newsstanddb-getdbfile failed")
+        
+#     @unittest.skip('Temp')          
+    def testSetDBFile(self):
+        self.assertFalse(call(["newsstanddb-setdbfile","test.sql"]),"newsstanddb-setdbfile failed")
