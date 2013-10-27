@@ -29,6 +29,8 @@ Create, search and analyze a DB with your Apple's newsstand app information
 	- http://stackoverflow.com/questions/2887878/importing-a-csv-file-into-a-sqlite3-database-table-using-python
 - CSV module reference
 	- http://docs.python.org/2/library/csv.html
+- Reading a UTF8 CSV file
+	- http://stackoverflow.com/questions/904041/reading-a-utf8-csv-file-with-python
 - SQL WHERE clause
 	- http://www.w3schools.com/sql/sql_where.asp
 - SQL IN operator
@@ -58,6 +60,8 @@ Create, search and analyze a DB with your Apple's newsstand app information
 - List comprehensions
 	- http://www.secnetix.de/olli/Python/list_comprehensions.hawk
 	- http://stackoverflow.com/questions/8049798/understanding-nested-list-comprehension
+	- http://stackoverflow.com/questions/3900215/ignore-an-element-while-building-list-in-python
+	- http://stackoverflow.com/questions/4260280/python-if-else-in-list-comprehension
 - Index ranges
 	- http://effbot.org/zone/python-list.htm
 - MD5 Checksum of files
@@ -72,4 +76,25 @@ Create, search and analyze a DB with your Apple's newsstand app information
 	- http://stackoverflow.com/questions/919680/python-can-a-variable-number-of-arguments-be-passed-to-a-function
 - Searching for files based on a pattern
 	- http://stackoverflow.com/questions/3348753/python-search-file-using-wildcard
+- Argparse reference
+	- http://docs.python.org/2/library/argparse.html#module-argparse
+- Run a shell command
+	- http://stackoverflow.com/questions/89228/calling-an-external-command-in-python
+- Pad a string
+	- http://stackoverflow.com/questions/5676646/fill-out-a-python-string-with-spaces
+- Get absolute path
+	- http://stackoverflow.com/questions/51520/how-to-get-an-absolute-file-path-in-python
+- Error reference
+	- http://docs.python.org/2/tutorial/errors.html
+- Handling exceptions
+	- http://www.tutorialspoint.com/python/python_exceptions.htm
+- Subprocess reference (call shell command)
+	- http://docs.python.org/2/library/subprocess.html
+	- http://stackoverflow.com/questions/89228/calling-an-external-command-in-python
+- Converting list to *args in Python
+	- http://stackoverflow.com/questions/3941517/converting-list-to-args-in-python/3941541#3941541
+- Variable arguments for functions
+	- http://stackoverflow.com/questions/919680/python-can-a-variable-number-of-arguments-be-passed-to-a-function
+- Add one year to current date
+	- http://stackoverflow.com/questions/15741618/add-one-year-in-current-date-python
 	
