@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='newsstand_db',
-      version='0.5',
+      version='0.5.1',
       description="Create, search and analyze a DB with your Apple's newsstand app information",
       long_description=readme(),
       classifiers=[
