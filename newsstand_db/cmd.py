@@ -118,9 +118,9 @@ def newsstanddb_setdbfile():
     parser = argparse.ArgumentParser(description='Set the DB file.')
     parser.add_argument('file', help='the file to set as persistent DB')
     
-    print '\n'
-    parser.print_help()
-    print '\n'
+#     print '\n'
+#     parser.print_help()
+#     print '\n'
     
     args = parser.parse_args()
     
@@ -130,6 +130,8 @@ def newsstanddb_setdbfile():
         print 'Couldn\'nt connect to DB'
         
     db.setDBFile(args.file)
+    
+    print '\n== DB File Set Successfully ==\n'
     
 def newsstanddb_addproduct():
     parser = argparse.ArgumentParser(description='Add product definition to DB.')
