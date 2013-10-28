@@ -43,6 +43,11 @@ class TestCmd(TestCase):
 #     @unittest.skip('Temp')      
     def testAutoUpdate(self):
         self.__db.createDB()
+        #Product setup
+        self.__db.addProduct('02/01/2013','IA1',3.5)
+        self.__db.addProduct('02/01/2013','IAY',1.4)
+        self.__db.addProduct('10/01/2013','IAY',2.1)
+        #Test
         self.assertFalse(call(["newsstanddb-update", "-d", ".", "-p", "*.csv", "-o", "stats.md"]), 
                          "newsstanddb-update failed")
         remove('stats.md')
@@ -50,6 +55,11 @@ class TestCmd(TestCase):
 #     @unittest.skip('Temp')      
     def testAutoUpdateVerbose(self):
         self.__db.createDB()
+        #Product setup
+        self.__db.addProduct('02/01/2013','IA1',3.5)
+        self.__db.addProduct('02/01/2013','IAY',1.4)
+        self.__db.addProduct('10/01/2013','IAY',2.1)
+        #Test
         self.assertFalse(call(["newsstanddb-update", "-d", ".", "-p", "*.csv", "-o", "stats.md", 
                                "-vvv"]),"newsstanddb-update failed")
         remove('stats.md')
@@ -57,6 +67,11 @@ class TestCmd(TestCase):
 #     @unittest.skip('Temp')          
     def testGetStats(self):
         self.__db.createDB()
+        #Product setup
+        self.__db.addProduct('02/01/2013','IA1',3.5)
+        self.__db.addProduct('02/01/2013','IAY',1.4)
+        self.__db.addProduct('10/01/2013','IAY',2.1)
+        #Test
         call(["newsstanddb-import", "test.csv", "test2.csv", "testOptin.csv"])
         self.assertFalse(call(["newsstanddb-stats",]),"newsstanddb-stats failed")
 

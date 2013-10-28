@@ -7,6 +7,7 @@ class TestCreate(TestCase):
     __statsSQL = '''CREATE TABLE stats (Date TEXT, UniqueUsers INTEGER, PayingUsers INTEGER, Conversion REAL, TotalProceeds REAL, ProceedsPerUser REAL, CLV REAL, CurrentSubscribers INTEGER)'''
     __monthProceedsSQL = '''CREATE TABLE monthProceeds (Month TEXT, Proceeds REAL)'''
     __optinSQL = '''CREATE TABLE optin (FirstName TEXT, LastName TEXT, EmailAddress TEXT, PostalCode TEXT, AppleIdentifier TEXT, ReportStartDate TEXT, ReportEndDate TEXT)'''
+    __productSQL = '''CREATE TABLE product (CutoffDate TEXT, Product TEXT, Proceeds REAL)'''
     
     def tearDown(self):
         s = ndb('test.sql')
@@ -34,11 +35,13 @@ class TestCreate(TestCase):
         self.assertIn((u'stats',), t, '\'stats\' table not in database')
         self.assertIn((u'monthProceeds',), t, '\'monthProceeds\' table not in database')
         self.assertIn((u'optin',), t, '\'optin\' table not in database')
+        self.assertIn((u'product',), t, '\'product\' table not in database')
         
         for name,structure in [('data',self.__dataSQL),('file',self.__fileSQL),
                                ('stats',self.__statsSQL),
                                ('monthProceeds',self.__monthProceedsSQL),
-                               ('optin',self.__optinSQL)]:
+                               ('optin',self.__optinSQL),
+                               ('product',self.__productSQL)]:
             # Fetch each table's sql
             code = ''.join(["SELECT sql FROM sqlite_master WHERE type = 'table' AND name = '",name,"';",])
             s.cur.execute(code)
@@ -48,3 +51,17 @@ class TestCreate(TestCase):
             # And verify SQL schema is correct
             self.assertEqual(t, structure, ''.join(['\'',name,
                                                     '\' table schema is not as expected',]))
+    def testProductSetup(self):
+        # Create database
+        s = ndb('test.sql')
+        
+        # Create tables
+        s.createDB()
+        
+        s.addProduct('02/01/2013','IA1',3.5)
+        s.addProduct('02/01/2013','IAY',1.4)
+        s.addProduct('10/01/2013','IAY',2.1)
+        
+        s.cur.execute("SELECT * FROM product")
+        self.assertEqual(len(s.cur.fetchall()), 3, 
+                         'The number of records in the product table are not as expected')

@@ -52,6 +52,8 @@ class newsstandDB:
             (ratio between total paying usrs and proceeds)
         calculateCurrentSubscribers() #calculate the amount of subscribers active in 
             the past 30 days
+        addProduct(cutoffDdate,product,price) #Add a product to the product table
+        getProductProceeds(date,product) #get the price of a product at a certain date
         
     '''
     __path = os.path.split(__file__)[0]
@@ -75,6 +77,7 @@ class newsstandDB:
     __optinStructure = ('FirstName TEXT','LastName TEXT','EmailAddress TEXT',
                         'PostalCode TEXT','AppleIdentifier TEXT',
                         'ReportStartDate TEXT','ReportEndDate TEXT')
+    __productStructure = ('CutoffDate TEXT','Product TEXT','Proceeds REAL')
     
     __dbFilename = ''
     __pDBFile = os.path.join(__path, 'dbfile') #Persistent DB file store
@@ -170,22 +173,27 @@ class newsstandDB:
         except ZeroDivisionError:
             return 0.0
     
-    def calculateProceeds(self,product):
+    def calculateProceeds(self,product,date):
         '''calculateProceeds(product): Calculate the proceeds depending on the Product Type 
         Identifier'''
-        if product=="IA1":
-            return 3.5
-        elif product=="IAY":
-            return 2.1
-        else:
-            raise #TODO: Define exception
+        #TODO: Eliminate this function (redundant)
+        try:
+            return self.getProductProceeds(date, product)
+        except:
+            raise
+#         if product=="IA1":
+#             return 3.5
+#         elif product=="IAY":
+#             return 2.1
+#         else:
+#             raise #TODO: Define exception
     
     def calculateTotalProceeds(self):
         '''calculateTotalProceeds(): calculate the total revenue'''
-        self.cur.execute("SELECT ProductTypeIdentifier FROM data WHERE CustomerPrice > 0")
-        proceedsList = [self.calculateProceeds(product[0]) for product in self.cur.fetchall()]
-        self.cur.execute("SELECT ProductTypeIdentifier FROM data WHERE CustomerPrice < 0")
-        proceedsList += [self.calculateProceeds(product[0])*-1.0 for product in self.cur.fetchall()]
+        self.cur.execute("SELECT ProductTypeIdentifier,DownloadDatePST FROM data WHERE CustomerPrice > 0")
+        proceedsList = [self.calculateProceeds(product[0],product[1]) for product in self.cur.fetchall()]
+        self.cur.execute("SELECT ProductTypeIdentifier,DownloadDatePST FROM data WHERE CustomerPrice < 0")
+        proceedsList += [self.calculateProceeds(product[0],product[1])*-1.0 for product in self.cur.fetchall()]
         return sum(proceedsList)
     
     def calculateProceedsPerUser(self,proceeds,users):
@@ -233,7 +241,8 @@ class newsstandDB:
             for name,structure in [('data',self.__dataStructure),('file',self.__fileStructure),
                                    ('stats',self.__statsStructure),
                                    ('monthProceeds',self.__monthProceedsStructure),
-                                   ('optin',self.__optinStructure)]:
+                                   ('optin',self.__optinStructure),
+                                   ('product',self.__productStructure)]:
                 try:
                     code = ''.join(["CREATE TABLE ",name," (",', '.join(structure),")"])
                     with self.con:
@@ -403,7 +412,10 @@ class newsstandDB:
     
     def printStats(self):
         '''printStats(): print the stats to the stdout'''
-        date, stats = self.getStats()
+        try:
+            date, stats = self.getStats()
+        except:
+            raise #TODO: better exception handling
         
         print '---------------------------------'
         print ''.join(['|'.ljust(6),'Stats for ',date,'|'.rjust(7)])
@@ -433,3 +445,21 @@ class newsstandDB:
         '''getDBFile(): Get the persistent DB file path'''
         with open(self.__pDBFile,'r') as fin:
             return fin.read()
+        
+    def addProduct(self,cutoffDate,product,proceeds):
+        '''addProduct(cutoffDdate,product,proceeds): Add a product to the product table'''
+        try:
+            with self.con as c:
+                c.execute('INSERT INTO product VALUES(?,?,?)',(cutoffDate,product,proceeds))
+        except:
+            raise #TODO: better exception handling
+    
+    def getProductProceeds(self,date,product):
+        '''getProductProceeds(date,product): get the proceeds of a product at a certain date'''
+        try:
+            self.cur.execute("SELECT cutoffDate,proceeds FROM product WHERE product=?",(product,))
+            data = self.cur.fetchall()
+            products = [(cutoffDate,proceeds) for cutoffDate,proceeds in data if cutoffDate < date]
+            return max(products)[1] #proceeds
+        except:
+            raise

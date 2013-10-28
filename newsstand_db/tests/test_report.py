@@ -8,6 +8,10 @@ class TestStats(TestCase):
         self.__db = ndb('test.sql')
         self.__db.createDB()
         self.__db.importData('test2.csv')
+        #Product setup
+        self.__db.addProduct('02/01/2013','IA1',3.5)
+        self.__db.addProduct('02/01/2013','IAY',1.4)
+        self.__db.addProduct('10/01/2013','IAY',2.1)
         
     def tearDown(self):
         self.__db.removeDB()
@@ -19,7 +23,8 @@ class TestStats(TestCase):
         remove('stats.md')
     
     def testPrintStats(self):
-        pass
+        self.__db.buildStats()
+        self.__db.printStats()
         
     def testOptinExport(self):
         pass
