@@ -2,6 +2,8 @@
 
 Create, search and analyze a DB with your Apple's newsstand app information
 
+*(TODO: Add Usage reference)*
+
 ## Developer Reference
 
 ### Package reference
@@ -47,6 +49,8 @@ Create, search and analyze a DB with your Apple's newsstand app information
 	- http://stackoverflow.com/questions/7562775/deriving-a-class-from-testcase-throws-two-errors
 - Unit test in PyDev
 	- http://pydev.org/manual_adv_pyunit.html
+- Assert system exit
+	- http://stackoverflow.com/questions/15672151/is-it-possible-for-a-unit-test-to-assert-that-a-method-calls-sys-exit
 
 ### Aptana Studio
 
@@ -85,7 +89,7 @@ Create, search and analyze a DB with your Apple's newsstand app information
 - Get absolute path
 	- http://stackoverflow.com/questions/51520/how-to-get-an-absolute-file-path-in-python
 - Error reference
-	- http://docs.python.org/2/tutorial/errors.html
+	- http://docs.python.org/2/tutorial/errors.html	
 - Handling exceptions
 	- http://www.tutorialspoint.com/python/python_exceptions.htm
 - Subprocess reference (call shell command)
