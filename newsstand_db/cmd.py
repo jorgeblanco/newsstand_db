@@ -130,3 +130,18 @@ def newsstanddb_setdbfile():
         print 'Couldn\'nt connect to DB'
         
     db.setDBFile(args.file)
+    
+def newsstanddb_addproduct():
+    parser = argparse.ArgumentParser(description='Add product definition to DB.')
+    parser.add_argument('date', help='the cut-off date (when this change took effect)')
+    parser.add_argument('product', help='the product identifier')
+    parser.add_argument('proceeds', type=float, help='the product\'s developer proceeds')
+    
+    args = parser.parse_args()
+    
+    try:
+        db = ndb(newsstanddb_getdbfile())
+    except IOError:
+        print 'Couldn\'nt connect to DB'
+        
+    db.addProduct(args.date,args.product,args.proceeds)

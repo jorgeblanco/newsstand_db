@@ -27,7 +27,7 @@ class TestCreate(TestCase):
         # Fetch all tables from DB
         s.cur.execute("SELECT name FROM sqlite_master WHERE type = 'table';")
         t = s.cur.fetchall()
-#         print t
+#         print t #Debug
         #     @unittest.skip('Temp')          
         # Verify that the tables we = ndb('test.sql')re created
         self.assertIn((u'data',), t, '\'data\' table not in database')
@@ -46,7 +46,7 @@ class TestCreate(TestCase):
             code = ''.join(["SELECT sql FROM sqlite_master WHERE type = 'table' AND name = '",name,"';",])
             s.cur.execute(code)
             t = s.cur.fetchone()[0] # No exception handling here, assuming that table still exists
-#             print t
+#             print t #Debug
         
             # And verify SQL schema is correct
             self.assertEqual(t, structure, ''.join(['\'',name,

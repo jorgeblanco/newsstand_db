@@ -2,12 +2,14 @@ from unittest import TestCase
 from newsstand_db import newsstandDB as ndb
 from os.path import isfile
 from os import remove
+from os import path
 
 class TestStats(TestCase):
     def setUp(self):
-        self.__db = ndb('test.sql')
+        self.__path = path.split(__file__)[0]
+        self.__db = ndb(path.join(self.__path,'test.sql'))
         self.__db.createDB()
-        self.__db.importData('test2.csv')
+        self.__db.importData(path.join(self.__path,'test2.csv'))
         #Product setup
         self.__db.addProduct('02/01/2013','IA1',3.5)
         self.__db.addProduct('02/01/2013','IAY',1.4)
@@ -18,19 +20,19 @@ class TestStats(TestCase):
         
     def testOutputStats(self):
         self.__db.buildStats()
-        self.__db.outputStats('stats.md')
-        self.assertTrue(isfile('stats.md'), 'The stats file is not being created')
-        remove('stats.md')
+        self.__db.outputStats(path.join(self.__path,'stats.md'))
+        self.assertTrue(isfile(path.join(self.__path,'stats.md')), 'The stats file is not being created')
+        remove(path.join(self.__path,'stats.md'))
     
     def testPrintStats(self):
         self.__db.buildStats()
         self.__db.printStats()
         
     def testOptinExport(self):
-        pass
+        pass #TODO: Add test & function
     
     def testOutputStatsHistorical(self):
-        pass
+        pass #TODO: Add test & function
     
     def testOutputStatsChart(self):
-        pass
+        pass #TODO: Add test & function

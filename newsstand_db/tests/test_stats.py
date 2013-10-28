@@ -2,6 +2,7 @@ from unittest import TestCase
 from newsstand_db import newsstandDB as ndb
 from os.path import isfile
 from os import remove
+from os import path
 
 '''
 Functions to test:
@@ -20,9 +21,10 @@ Functions to test:
 
 class TestStats(TestCase):
     def setUp(self):
-        self.__db = ndb('test.sql')
+        self.__path = path.split(__file__)[0]
+        self.__db = ndb(path.join(self.__path,'test.sql'))
         self.__db.createDB()
-        self.__db.importData('test2.csv')
+        self.__db.importData(path.join(self.__path,'test2.csv'))
         #Product setup
         self.__db.addProduct('02/01/2013','IA1',3.5)
         self.__db.addProduct('02/01/2013','IAY',1.4)
@@ -30,7 +32,7 @@ class TestStats(TestCase):
         
     def tearDown(self):
         self.__db.removeDB()
-#         self.__db.con.close()
+#         self.__db.con.close() #Debug
         
     def testUniqueUsers(self):
         s = self.__db.calculateUniqueUsers()        
@@ -71,6 +73,9 @@ class TestStats(TestCase):
         self.assertTrue(isinstance(s, int),'Current subscribers is not an integer')
         self.assertEqual(s, 14, 'Current subscribers doesn\'t return the expected value')
         
+    def testBuildStats(self):
+        self.assertFalse(self.__db.buildStats(), 'Build stats failed')        
+        
     def testWriteStats(self):
         self.__db.buildStats()
         self.__db.writeStats()
@@ -78,4 +83,21 @@ class TestStats(TestCase):
         s = self.__db.cur.fetchall()
 #         print s #Debug
         self.assertEqual(len(s), 1, 'The length of the stats table is not as expected')
+        
+class TestStatsFail(TestCase):
+    def setUp(self):
+        self.__path = path.split(__file__)[0]
+        self.__db = ndb(path.join(self.__path,'test.sql'))
+        self.__db.createDB()
+        self.__db.importData(path.join(self.__path,'test2.csv'))
+        
+    def tearDown(self):
+        self.__db.removeDB()
+#         self.__db.con.close() # Debug
+
+    def testBuildStatsFail(self):
+        with self.assertRaises(SystemExit) as cm:
+            self.__db.buildStats()
+            
+        self.assertEqual(cm.exception.code, 1)
         

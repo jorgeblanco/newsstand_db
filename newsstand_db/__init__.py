@@ -459,7 +459,12 @@ class newsstandDB:
         try:
             self.cur.execute("SELECT cutoffDate,proceeds FROM product WHERE product=?",(product,))
             data = self.cur.fetchall()
-            products = [(cutoffDate,proceeds) for cutoffDate,proceeds in data if cutoffDate < date]
-            return max(products)[1] #proceeds
+            products = [(cutoffDate,proceeds) for cutoffDate,proceeds in data if cutoffDate <= date]
+            try:
+                return max(products)[1] #proceeds
+            except ValueError:
+                print 'Could not find matching product.' 
+                print 'You should add the correct product to the DB first.'
+                exit(1)
         except:
             raise
