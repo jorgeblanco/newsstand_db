@@ -16,6 +16,8 @@ Create, search and analyze a DB with your Apple's newsstand app information
 	- http://docs.python.org/2/tutorial/modules.html#importing-from-a-package
 - Organizing Python classes in modules and/or packages
 	- http://stackoverflow.com/questions/3842616/organizing-python-classes-in-modules-and-or-packages/13258827#13258827
+- Setuptools reference
+	- http://pythonhosted.org/an_example_pypi_project/setuptools.html
 		
 ### SQLite reference
 
@@ -51,6 +53,8 @@ Create, search and analyze a DB with your Apple's newsstand app information
 	- http://pydev.org/manual_adv_pyunit.html
 - Assert system exit
 	- http://stackoverflow.com/questions/15672151/is-it-possible-for-a-unit-test-to-assert-that-a-method-calls-sys-exit
+- Exception caught in shell
+	- http://stackoverflow.com/questions/9202772/tests-succeed-still-get-traceback
 
 ### Aptana Studio
 

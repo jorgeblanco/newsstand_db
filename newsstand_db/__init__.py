@@ -112,7 +112,7 @@ class newsstandDB:
             exit(-1)
         else:
             self.cur = self.con.cursor()
-            print 'Connected to the database\n'
+#             print 'Connected to the database\n'
         
     def __del__(self):
         '''del: Try to shutdown as cleanly as possible. Close the database connection and open file handles'''
