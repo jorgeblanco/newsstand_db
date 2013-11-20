@@ -417,12 +417,12 @@ class newsstandDB:
         except:
             raise #TODO: better exception handling
         
-        print '---------------------------------'
-        print ''.join(['|'.ljust(6),'Stats for ',date,'|'.rjust(7)])
-        print '---------------------------------'
+        print '-----------------------------------'
+        print ''.join(['|'.ljust(7),'Stats for ',date,'|'.rjust(8)])
+        print '-----------------------------------'
         for label,data in stats:
-            print ''.join(['|',label.rjust(22),': ',data.ljust(7),'|'])
-        print '---------------------------------'
+            print ''.join(['|',label.rjust(22),': ',data.ljust(9),'|'])
+        print '-----------------------------------'
         
     def outputStats(self,filename='stats.md'):
         '''outputStats(filename): Write current stats to external file'''
